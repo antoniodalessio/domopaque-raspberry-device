@@ -44,7 +44,8 @@ async function createRoutes() {
         { 
           name: 'main_light',
           range: [0,1],
-          step: 1
+          step: 1,
+          value: await main_light.read()
         }
       ]
     }

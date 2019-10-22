@@ -8,7 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var express = require('express');
+var sensorLib = require('node-dht-sensor');
 var app = express();
+const Gpio = require('onoff').Gpio;
+const main_light = new Gpio(17, 'out');
+process.on('SIGINT', _ => {
+    main_light.unexport();
+});
 app.use(express.json());
 app.listen(3005, function () {
     return __awaiter(this, void 0, void 0, function* () {
@@ -18,26 +24,70 @@ app.listen(3005, function () {
 });
 function initApp() {
     return __awaiter(this, void 0, void 0, function* () {
-        createRoutes();
+        yield createRoutes();
     });
 }
 function createRoutes() {
-    app.get('/ping', function (req, res) {
-        let data = {
-            deviceName: 'soggiorno_device_1',
-            ip: "192.168.1.5",
-            sensors: [
-                {
-                    temperature: "21.20"
-                },
-                {
-                    umidity: "75.00"
-                }
-            ],
-            actuators: []
-        };
-        res.setHeader('Content-Type', 'application/json');
-        res.send(JSON.stringify(data));
+    return __awaiter(this, void 0, void 0, function* () {
+        app.get('/ping', function (req, res) {
+            return __awaiter(this, void 0, void 0, function* () {
+                let sens = yield sensorLib.read(11, 4);
+                let data = {
+                    deviceName: 'soggiorno_device_1',
+                    ip: "192.168.1.5",
+                    sensors: [
+                        {
+                            temperature: sens.temperature.toFixed(2),
+                        },
+                        {
+                            umidity: sens.humidity.toFixed(2),
+                        }
+                    ],
+                    actuators: []
+                };
+                res.setHeader('Content-Type', 'application/json');
+                res.send(JSON.stringify(data));
+            });
+        });
+        app.get('/temperature', function (req, res) {
+            return __awaiter(this, void 0, void 0, function* () {
+                let sens = yield sensorLib.read(11, 4);
+                let data = {
+                    value: sens.temperature.toFixed(2),
+                };
+                res.setHeader('Content-Type', 'application/json');
+                res.send(JSON.stringify(data));
+            });
+        });
+        app.get('/umidity', function (req, res) {
+            return __awaiter(this, void 0, void 0, function* () {
+                let sens = yield sensorLib.read(11, 4);
+                let data = {
+                    value: sens.humidity.toFixed(2),
+                };
+                res.setHeader('Content-Type', 'application/json');
+                res.send(JSON.stringify(data));
+            });
+        });
+        app.get('/umidity', function (req, res) {
+            return __awaiter(this, void 0, void 0, function* () {
+                let sens = yield sensorLib.read(11, 4);
+                let data = {
+                    value: sens.humidity.toFixed(2),
+                };
+                res.setHeader('Content-Type', 'application/json');
+                res.send(JSON.stringify(data));
+            });
+        });
+        app.post('/main_light', function (req, res) {
+            return __awaiter(this, void 0, void 0, function* () {
+                let value = parseInt(req.body.value);
+                console.log(value);
+                main_light.writeSync(value);
+                res.setHeader('Content-Type', 'application/json');
+                res.send(JSON.stringify({ msg: value }));
+            });
+        });
     });
 }
 //# sourceMappingURL=index.js.map

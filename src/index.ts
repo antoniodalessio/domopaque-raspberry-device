@@ -76,10 +76,11 @@ async function createRoutes() {
 
 
   app.post('/main_light', async function (req, res) {
-    let value = req.body.value
+    let value = parseInt(req.body.value)
+	console.log(value)
     main_light.writeSync(value);
     res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify({msg: "ok"}));
+    res.send(JSON.stringify({msg: value}));
   })
 
   

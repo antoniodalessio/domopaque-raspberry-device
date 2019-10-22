@@ -37,6 +37,25 @@ async function createRoutes() {
     res.send(JSON.stringify(data));
   });
 
+
+  app.get('/temperature', async function (req, res) {
+    let sens = await sensorLib.read(11, 4);
+    let data = {
+      value: sens.temperature.toFixed(2),
+    }
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(data));
+  })
+
+  app.get('/umidity', async function (req, res) {
+    let sens = await sensorLib.read(11, 4);
+    let data = {
+      value: sens.humidity.toFixed(2),
+    }
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(data));
+  })
+
   
 
 }

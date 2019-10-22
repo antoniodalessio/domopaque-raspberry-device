@@ -77,10 +77,17 @@ async function createRoutes() {
 
   app.post('/main_light', async function (req, res) {
     let value = parseInt(req.body.value)
-	console.log(value)
-    main_light.writeSync(value);
+    if (value == 0 || value == 1) {
+      main_light.writeSync(value);
+    }
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify({msg: value}));
+  })
+
+  app.get('/main_light', async function (req, res) {
+    let value = await main_light.read()
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify({value}));
   })
 
   

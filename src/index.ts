@@ -1,5 +1,6 @@
 var express = require('express');
 var sensorLib = require('node-dht-sensor');
+import { config } from './config'
 var app = express();
 
 const Gpio = require('onoff').Gpio;
@@ -29,8 +30,8 @@ async function createRoutes() {
     let sens = await sensorLib.read(11, 4);
 
     let data =  {
-      deviceName: 'soggiorno_device_1',
-      ip: "192.168.1.5",
+      deviceName: config.name,
+      ip: config.ip,
       sensors: [
         {
           temperature: sens.temperature.toFixed(2),
@@ -39,7 +40,13 @@ async function createRoutes() {
           umidity: sens.humidity.toFixed(2),
         }
       ],
-      actuators: [ ]
+      actuators: [
+        { 
+          name: 'main_light',
+          range: [0,1],
+          step: 1
+        }
+      ]
     }
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify(data));

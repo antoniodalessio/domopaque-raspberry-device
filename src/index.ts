@@ -2,6 +2,14 @@ var express = require('express');
 var sensorLib = require('node-dht-sensor');
 var app = express();
 
+const Gpio = require('onoff').Gpio;
+
+const main_light = new Gpio(17, 'out');
+
+process.on('SIGINT', _ => {
+  main_light.unexport();
+});
+
 app.use(express.json());
 
 app.listen(3005, async function () {
@@ -54,6 +62,24 @@ async function createRoutes() {
     }
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify(data));
+  })
+
+
+  app.get('/umidity', async function (req, res) {
+    let sens = await sensorLib.read(11, 4);
+    let data = {
+      value: sens.humidity.toFixed(2),
+    }
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(data));
+  })
+
+
+  app.post('/main_light', async function (req, res) {
+    let value = req.body.value
+    main_light.writeSync(value);
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify({msg: "ok"}));
   })
 
   

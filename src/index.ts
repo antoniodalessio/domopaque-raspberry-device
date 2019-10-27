@@ -6,7 +6,7 @@ var app = express();
 const Gpio = require('onoff').Gpio;
 
 const main_light = new Gpio(17, 'out');
-const main_light_switch = new Gpio(27, 'both');
+const main_light_switch = new Gpio(27, 'in', 'rising', {debounceTimeout: 10});
 
 process.on('SIGINT', _ => {
   main_light.unexport();
@@ -22,7 +22,7 @@ app.listen(3005, async function () {
 
 async function initApp() {
 
-  main_light_switch.watch((err, value) => main_light.writeSync(value));
+  main_light_switch.watch((err, value) => main_light.writeSync(main_light.readSync() ^ 1));
 
 
   await createRoutes();

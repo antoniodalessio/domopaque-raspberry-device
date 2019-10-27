@@ -22,10 +22,12 @@ app.listen(3005, async function () {
 
 async function initApp() {
 
-  // main_light_switch.watch(async (err, value) => {
-  //   let val = await main_light.read()
-  //   await main_light.write(!val)
-  // });
+  main_light_switch.watch((err, value) => {
+    let val = main_light.readSync()
+    if (val == 0 || val == 1) {
+      main_light.writeSync(val);
+    }
+  });
 
 
   await createRoutes();

@@ -22,8 +22,9 @@ app.listen(3005, async function () {
 
 async function initApp() {
 
-  main_light_switch.watch((err, value) => {
-    console.log(value)
+  main_light_switch.watch(async (err, value) => {
+    let val = await main_light.readSync()
+    await main_light.writeSync(!val)
   });
 
 

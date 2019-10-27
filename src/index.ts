@@ -24,7 +24,10 @@ async function initApp() {
 
   main_light_switch.watch((err, value) => {
     let val = main_light.readSync()
+    console.log(val)
     if (val == 0 || val == 1) {
+      val = val ^ 1
+      console.log("newVal", val)
       main_light.writeSync(val);
     }
   });

@@ -86,17 +86,6 @@ async function createRoutes() {
     res.send(JSON.stringify(data));
   })
 
-
-  app.get('/umidity', async function (req, res) {
-    let sens = await sensorLib.read(11, 4);
-    let data = {
-      value: sens.humidity.toFixed(2),
-    }
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(data));
-  })
-
-
   app.post('/main_light', async function (req, res) {
     let value = parseInt(req.body.value)
     if (value == 0 || value == 1) {

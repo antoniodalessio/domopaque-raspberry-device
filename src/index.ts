@@ -32,7 +32,6 @@ async function initApp() {
     }
   });
 
-
   await createRoutes();
 }
 
@@ -57,15 +56,10 @@ async function createRoutes() {
       actuators: [
         { 
           name: 'main_light',
+          alias: 'soggiorno_main_light',
           range: [0,1],
           step: 1,
           value: await main_light.read()
-        },
-        { 
-          name: 'main_light_switch',
-          range: [0,1],
-          step: 1,
-          value: await main_light_switch.read()
         }
       ]
     }

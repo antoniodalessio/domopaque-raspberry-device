@@ -6,7 +6,7 @@ var app = express();
 const Gpio = require('onoff').Gpio;
 
 const main_light = new Gpio(17, 'out');
-const main_light_switch = new Gpio(27, 'in', 'rising', {debounceTimeout: 20});
+const main_light_switch = new Gpio(18, 'in', 'rising', {debounceTimeout: 20});
 
 process.on('SIGINT', _ => {
   main_light.unexport();

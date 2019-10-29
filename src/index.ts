@@ -1,12 +1,13 @@
 var express = require('express');
 var sensorLib = require('node-dht-sensor');
 import { config } from './config'
+import { watch } from 'fs';
 var app = express();
 
 const Gpio = require('onoff').Gpio;
 
 const main_light = new Gpio(17, 'out');
-const main_light_switch = new Gpio(18, 'in', 'both', {debounceTimeout: 20});
+const main_light_switch = new Gpio(27, 'in', 'rising', {debounceTimeout: 200});
 
 process.on('SIGINT', _ => {
   main_light.unexport();
@@ -23,12 +24,12 @@ app.listen(3005, async function () {
 async function initApp() {
 
   main_light_switch.watch(async (err, value) => {
-    let val = await main_light.read()
-    console.log(val)
-    if (val == 0 || val == 1) {
-      val = val ^ 1
-      console.log("newVal", val)
-      await main_light.write(val);
+    //let val = await main_light.read()
+    console.log(value)
+    if (value == 0 || value == 1) {
+      value = value ^ 1
+      console.log("newVal", value)
+      main_light.writeSync(value);
     }
   });
 

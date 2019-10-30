@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,13 +8,36 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var express = require('express');
 var sensorLib = require('node-dht-sensor');
+const config_1 = require("./config");
 var app = express();
-const Gpio = require('onoff').Gpio;
-const main_light = new Gpio(17, 'out');
+//const Gpio = require('onoff').Gpio;
+const Gpio = require('pigpio').Gpio;
+//const main_light = new Gpio(17, 'out');
+//const main_light_switch = new Gpio(18, 'in', 'rising', {debounceTimeout: 200});
+const main_light = new Gpio(17, { mode: Gpio.OUTPUT });
+const main_light_switch = new Gpio(18, {
+    mode: Gpio.INPUT,
+    pullUpDown: Gpio.PUD_DOWN,
+    edge: Gpio.RISING_EDGE,
+    alert: true
+});
+main_light_switch.glitchFilter(100000);
+main_light_switch.on('alert', (level, alert) => {
+    // const state = main_light.digitalRead()
+    //main_light.digitalWrite(state ^ 1)
+    console.log(alert);
+    if (level === 0) {
+        console.log("level", level);
+        const state = main_light.digitalRead();
+        main_light.digitalWrite(state ^ 1);
+    }
+});
 process.on('SIGINT', _ => {
     main_light.unexport();
+    main_light_switch.unexport();
 });
 app.use(express.json());
 app.listen(3005, function () {
@@ -24,6 +48,15 @@ app.listen(3005, function () {
 });
 function initApp() {
     return __awaiter(this, void 0, void 0, function* () {
+        /*main_light_switch.watch(async (err, value) => {
+          //let val = await main_light.read()
+          console.log(value)
+          if (value == 0 || value == 1) {
+            value = value ^ 1
+            console.log("newVal", value)
+            main_light.writeSync(value);
+          }
+        });*/
         yield createRoutes();
     });
 }
@@ -33,8 +66,8 @@ function createRoutes() {
             return __awaiter(this, void 0, void 0, function* () {
                 let sens = yield sensorLib.read(11, 4);
                 let data = {
-                    deviceName: 'soggiorno_device_1',
-                    ip: "192.168.1.5",
+                    deviceName: config_1.config.name,
+                    ip: config_1.config.ip,
                     sensors: [
                         {
                             temperature: sens.temperature.toFixed(2),
@@ -43,7 +76,15 @@ function createRoutes() {
                             umidity: sens.humidity.toFixed(2),
                         }
                     ],
-                    actuators: []
+                    actuators: [
+                        {
+                            name: 'main_light',
+                            alias: 'soggiorno_main_light',
+                            range: [0, 1],
+                            step: 1,
+                            value: yield main_light.digitalRead()
+                        }
+                    ]
                 };
                 res.setHeader('Content-Type', 'application/json');
                 res.send(JSON.stringify(data));
@@ -69,23 +110,21 @@ function createRoutes() {
                 res.send(JSON.stringify(data));
             });
         });
-        app.get('/umidity', function (req, res) {
-            return __awaiter(this, void 0, void 0, function* () {
-                let sens = yield sensorLib.read(11, 4);
-                let data = {
-                    value: sens.humidity.toFixed(2),
-                };
-                res.setHeader('Content-Type', 'application/json');
-                res.send(JSON.stringify(data));
-            });
-        });
         app.post('/main_light', function (req, res) {
             return __awaiter(this, void 0, void 0, function* () {
                 let value = parseInt(req.body.value);
-                console.log(value);
-                main_light.writeSync(value);
+                if (value == 0 || value == 1) {
+                    main_light.digitalWrite(value);
+                }
                 res.setHeader('Content-Type', 'application/json');
                 res.send(JSON.stringify({ msg: value }));
+            });
+        });
+        app.get('/main_light', function (req, res) {
+            return __awaiter(this, void 0, void 0, function* () {
+                let value = yield main_light.digitalRead();
+                res.setHeader('Content-Type', 'application/json');
+                res.send(JSON.stringify({ value }));
             });
         });
     });

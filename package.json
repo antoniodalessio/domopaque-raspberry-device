@@ -27,7 +27,7 @@
   "homepage": "https://github.com/antoniodalessio/domopaque#readme",
   "dependencies": {
     "@types/node": "^12.7.8",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "node-dht-sensor": "^0.4.0",
     "onoff": "^5.0.0",
     "pigpio": "^2.0.1",
